@@ -38,13 +38,13 @@ const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
             key={`question ${id} answer - ${idx}`}
             className="flex items-center gap-2 py-2 pl-2"
           >
+            <span className="w-5">{idx + 1}</span>
             <input
               type="checkbox"
               className="checkbox"
               checked={correctAnswer === idx}
               onClick={() => setCorrectAnswer(idx)}
             />
-            <span className="w-5">{idx + 1}</span>
             <textarea
               className="textarea-bordered textarea textarea-xs w-full grow rounded-lg"
               value={answer}
