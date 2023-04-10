@@ -1,16 +1,25 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import React from "react";
 import { api } from "~/utils/api";
+import Loader from "../Loader";
 
 const Profile = () => {
-  const { data: sessionData } = useSession();
+  const { data: sessionData, status } = useSession();
 
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
+  // const { data: secretMessage, isLoading } =
+  //   api.example.getSecretMessage.useQuery(
+  //     undefined, // no input
+  //     {
+  //       enabled: sessionData?.user !== undefined,
+  //       onError: () => console.log("erorr"),
+  //     }
+  //   );
 
   const user = sessionData?.user;
+
+  if (status === "loading") {
+    return <Loader />;
+  }
 
   return (
     <div className="dropdown-end dropdown">
@@ -18,16 +27,16 @@ const Profile = () => {
         {user ? (
           <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
             <div className="w-9 rounded-full">
-              <img src={user.image ?? ""} />
+              <img src={sessionData?.user.image ?? ""} />
             </div>
           </label>
         ) : (
-          <button className="btn-primary btn" onClick={() => void signIn()}>
-            LogIn
+          <button className="btn-sm btn" onClick={() => void signIn()}>
+            Log In
           </button>
         )}
       </div>
-      {user && (
+      {sessionData?.user && (
         <ul
           tabIndex={0}
           className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-200  p-2 shadow"

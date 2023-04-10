@@ -6,15 +6,20 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import { Layout } from "./components/Layout";
+import { Provider, rootStore } from "../models/Root";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session}>
-      <Component {...pageProps} />
-    </SessionProvider>
+    <Provider value={rootStore}>
+      <SessionProvider session={session}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </SessionProvider>
+    </Provider>
   );
 };
 

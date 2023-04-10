@@ -4,15 +4,12 @@ import Navbar from "./Navbar";
 
 export const Layout: React.FC<PropsWithChildren> = (props) => {
   return (
-    <div className="overflow-none  flex h-screen min-h-full flex-col items-center justify-center">
+    <main className="flex min-h-screen flex-col">
       <Navbar />
-      <main>
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          {props.children}
-        </div>
-      </main>
-      <Footer />
-    </div>
+      <div className="my-1 flex h-0  min-h-full grow gap-1 p-1">
+        {props.children}
+      </div>
+    </main>
   );
 };
 
