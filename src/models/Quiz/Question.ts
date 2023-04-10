@@ -1,19 +1,29 @@
-import { types as t } from "mobx-state-tree";
+import { types as t, Instance, destroy } from "mobx-state-tree";
 
 export const Question = t
   .model("Question", {
-    title: "",
+    description: "",
     answers: t.array(t.string),
     correctAnswer: 0,
   })
   .actions((self) => ({
-    addAnswer(description: string) {
-      self.answers.push(description);
-    },
-    changeAnswer({ idx, description }: { idx: number; description: string }) {
-      self.answers[idx] = description;
+    setDescription(description: string) {
+      self.description = description;
     },
     setCorrectAnswer(idx: number) {
       self.correctAnswer = idx;
     },
+  }))
+  .actions((self) => ({
+    addAnswer() {
+      self.answers.push("");
+    },
+    deleteAnswer(idx: number) {
+      self.answers.splice(idx, 1);
+    },
+    changeAnswer({ idx, description }: { idx: number; description: string }) {
+      self.answers[idx] = description;
+    },
   }));
+
+export type QuestionInstance = Instance<typeof Question>;
