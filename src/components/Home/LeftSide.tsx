@@ -4,10 +4,9 @@ import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { api } from "~/utils/api";
-import { QuizList } from "./QuizList";
-import NewQuizInput from "./NewQuizInput";
+import QuizList from "./QuizList";
 
-const Questions = () => {
+const LeftSide = () => {
   const root = useMst();
   const router = useRouter();
   console.log("root", root);
@@ -50,4 +49,4 @@ const Questions = () => {
   );
 };
 
-export default observer(Questions);
+export default observer(LeftSide);

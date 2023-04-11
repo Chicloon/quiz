@@ -1,7 +1,7 @@
 import React from "react";
 
-const Answers = () => {
+const RightSide = () => {
   return <div>Answers</div>;
 };
 
-export default Answers;
+export default RightSide;

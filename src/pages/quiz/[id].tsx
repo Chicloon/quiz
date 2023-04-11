@@ -1,12 +1,11 @@
 import { useRouter } from "next/router";
 import React from "react";
 import { useMst } from "~/models/Root";
-import EditQuiz from "./EditQuiz";
+import { EditQuiz } from "~/components/";
 import { api } from "~/utils/api";
 import { Quiz } from "~/models";
 
 const SideId = () => {
-  const root = useMst();
   const router = useRouter();
   const { id } = router.query;
 

@@ -2,7 +2,7 @@ import React, { PropsWithChildren } from "react";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 
-export const Layout: React.FC<PropsWithChildren> = (props) => {
+const Layout: React.FC<PropsWithChildren> = (props) => {
   return (
     <main className="flex min-h-screen flex-col">
       <Navbar />

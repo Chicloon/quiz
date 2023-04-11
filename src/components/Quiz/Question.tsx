@@ -2,14 +2,10 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { QuestionInstance, useMst } from "~/models";
 
-// const Question: React.FC<{ save: () => void }> = ({ save }) => {
 const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
   model,
   id,
 }) => {
-  // const {
-  //   quiz: { questions },
-  // } = useMst();
   const {
     addAnswer,
     description,

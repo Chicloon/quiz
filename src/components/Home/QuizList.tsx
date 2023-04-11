@@ -1,8 +1,9 @@
 import React from "react";
 import { api } from "~/utils/api";
-import { Loader } from "../components";
+import { Loader } from "~/components";
+import Link from "next/link";
 
-export const QuizList = () => {
+const QuizList = () => {
   const { data, isLoading } = api.quiz.getAll.useQuery();
 
   if (isLoading) {
@@ -12,9 +13,13 @@ export const QuizList = () => {
     <div>
       <ol>
         {data?.map((el: any) => (
-          <li key={el.id}>{el.title}</li>
+          <Link key={el.id} href={`/quiz/${el.id}`}>
+            <li>{el.title}</li>
+          </Link>
         ))}
       </ol>
     </div>
   );
 };
+
+export default QuizList;
