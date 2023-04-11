@@ -43,7 +43,7 @@ const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
               type="checkbox"
               className="checkbox"
               checked={correctAnswer === idx}
-              onClick={() => setCorrectAnswer(idx)}
+              onChange={() => setCorrectAnswer(idx)}
             />
             <textarea
               className="textarea-bordered textarea textarea-xs w-full grow rounded-lg"

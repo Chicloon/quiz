@@ -1,5 +1,7 @@
 import { destroy, types as t } from "mobx-state-tree";
 import { Question } from "./Question";
+import { quizInput } from "~/server/api/routers/quiz";
+import { z } from "zod";
 
 export type ErrorFields = "title" | "question";
 
@@ -10,6 +12,24 @@ export const Quiz = t
     errors: t.map(t.string),
   })
   .views((self) => ({
+    quizBody() {
+      const body: z.infer<typeof quizInput> = {
+        title: self.title,
+        questions: self.questions.map((question, idx) => {
+          const { description, correctAnswer, answers } = question;
+          return {
+            order: idx,
+            description,
+            correctAnswer,
+            answers: answers.map((el, answerIdx) => ({
+              text: el,
+              order: answerIdx,
+            })),
+          };
+        }),
+      };
+      return body;
+    },
     get allowAddNextQuestion() {
       const lastQuestion = self.questions[self.questions.length - 1];
       const lastQuestionAnswers = lastQuestion?.answers;

@@ -68,11 +68,31 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-
 model Quiz {
-    id            String    @id @default(cuid())
-    title   String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id        String     @id @default(cuid())
+    title     String
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    questions Question[]
+}
 
+model Question {
+    id            String   @id @default(cuid())
+    description   String
+    quizId        String
+    order         Int
+    correctAnswer Int
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    answers       Answer[]
+}
+
+model Answer {
+    id         String   @id @default(cuid())
+    questionId String
+    order      Int
+    text       String
+    question   Question @relation(fields: [questionId], references: [id])
+    quizId     String?
 }

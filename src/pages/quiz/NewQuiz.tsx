@@ -16,6 +16,7 @@ const NewQuiz = () => {
       questions,
       addQuestion,
       allowAddNextQuestion,
+      quizBody,
     },
   } = useMst();
 
@@ -57,7 +58,7 @@ const NewQuiz = () => {
         </span>
       </label>
       {questions.map((question, idx) => (
-        <Question key={`qustion-${idx}`} model={question} id={idx} />
+        <Question key={`question-${idx}`} model={question} id={idx} />
       ))}
       <div className="flex justify-end">
         <button
@@ -66,6 +67,11 @@ const NewQuiz = () => {
           disabled={!allowAddNextQuestion}
         >
           Добавить вопрос
+        </button>
+      </div>
+      <div>
+        <button className="btn" onClick={() => mutate(quizBody())}>
+          Создать опросник
         </button>
       </div>
     </div>
