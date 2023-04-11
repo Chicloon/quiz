@@ -1,4 +1,4 @@
-import { destroy, types as t } from "mobx-state-tree";
+import { Instance, applySnapshot, destroy, types as t } from "mobx-state-tree";
 import { Question } from "./Question";
 import { quizInput } from "~/server/api/routers/quiz";
 import { z } from "zod";
@@ -7,6 +7,7 @@ export type ErrorFields = "title" | "question";
 
 export const Quiz = t
   .model("Quiz", {
+    id: "",
     title: "Quiz title is here",
     questions: t.array(Question),
     errors: t.map(t.string),
@@ -16,13 +17,15 @@ export const Quiz = t
       const body: z.infer<typeof quizInput> = {
         title: self.title,
         questions: self.questions.map((question, idx) => {
-          const { description, correctAnswer, answers } = question;
+          const { id, description, correctAnswer, answers } = question;
           return {
+            id,
             order: idx,
             description,
             correctAnswer,
             answers: answers.map((el, answerIdx) => ({
-              text: el,
+              id: el.id,
+              text: el.text,
               order: answerIdx,
             })),
           };
@@ -38,7 +41,7 @@ export const Quiz = t
         lastQuestionAnswers &&
         lastQuestionAnswers.length > 0 &&
         lastQuestion.description !== "" &&
-        lastQuestionAnswers.every((el) => el !== "")
+        lastQuestionAnswers.every((el) => el.text !== "")
       ) {
         return true;
       }
@@ -60,9 +63,15 @@ export const Quiz = t
       destroy(self.errors);
     },
   }))
+
   .actions((self) => ({
+    // init(data: QuizInstance) {
+    //   applySnapshot(self, data);
+    // },
     afterCreate() {
       self.questions.push({ description: "Question titile" });
       // self.errors.set("title", "asdfasdfa");
     },
   }));
+
+export type QuizInstance = Instance<typeof Quiz>;

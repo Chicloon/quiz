@@ -1,28 +1,32 @@
 import React, { useState } from "react";
 import { z } from "zod";
 import { observer } from "mobx-react-lite";
-import { useMst } from "~/models";
+import { QuizInstance, useMst } from "~/models";
 import { api } from "~/utils/api";
 import Question from "./Question";
 
-const NewQuiz = () => {
+const NewQuiz: React.FC<{ model: QuizInstance }> = ({ model }) => {
   const {
-    quiz: {
-      setTitle,
-      title,
-      errors,
-      setErrors,
-      clearErrors,
-      questions,
-      addQuestion,
-      allowAddNextQuestion,
-      quizBody,
-    },
-  } = useMst();
+    id,
+    setTitle,
+    title,
+    errors,
+    setErrors,
+    clearErrors,
+    questions,
+    addQuestion,
+    allowAddNextQuestion,
+    quizBody,
+  } = model;
 
   const ctx = api.useContext();
 
-  const { mutate, isLoading } = api.quiz.addNew.useMutation({
+  const { mutate: createNew } = api.quiz.addNew.useMutation({
+    onSuccess() {
+      void ctx.quiz.invalidate();
+    },
+  });
+  const { mutate: update } = api.quiz.update.useMutation({
     onSuccess() {
       void ctx.quiz.invalidate();
     },
@@ -43,7 +47,7 @@ const NewQuiz = () => {
   };
 
   return (
-    <div className="min-w-full p-4">
+    <div className="min-w-full overflow-auto p-4">
       <h1 className="text-lg font-semibold">Название опросника</h1>
 
       <input
@@ -70,9 +74,18 @@ const NewQuiz = () => {
         </button>
       </div>
       <div>
-        <button className="btn" onClick={() => mutate(quizBody())}>
-          Создать опросник
-        </button>
+        {id ? (
+          <button className="btn" onClick={() => createNew(quizBody())}>
+            Сохранить изменения
+          </button>
+        ) : (
+          <button
+            className="btn"
+            onClick={() => update({ quiz: quizBody(), quizId: id })}
+          >
+            Создать опросник
+          </button>
+        )}
       </div>
     </div>
   );

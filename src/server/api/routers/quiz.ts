@@ -10,11 +10,13 @@ export const quizInput = z.object({
   title: z.string(),
   questions: z.array(
     z.object({
+      id: z.string(),
       order: z.number(),
       description: z.string(),
       correctAnswer: z.number(),
       answers: z.array(
         z.object({
+          id: z.string(),
           text: z.string(),
           order: z.number(),
         })
@@ -25,48 +27,102 @@ export const quizInput = z.object({
 
 export const quizRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.quiz.findMany({ include: { questions: true } });
+    return ctx.prisma.quiz.findMany({
+      include: { questions: { include: { answers: true } } },
+    });
   }),
+  getById: publicProcedure
+    .input(
+      z.object({
+        id: z.union([z.string(), z.array(z.string()), z.undefined()]),
+      })
+    )
+    .query(({ ctx, input }) => {
+      const { id } = input;
+      if (!id || typeof id !== "string") {
+        return null;
+      }
+      return ctx.prisma.quiz.findFirst({
+        include: { questions: { include: { answers: true } } },
+        where: { id: id },
+      });
+    }),
+  update: publicProcedure
+    .input(z.object({ quiz: quizInput, quizId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // const { title, questions } = input.quiz
+      const {
+        quiz: { questions, title },
+        quizId,
+      } = input;
+
+      return ctx.prisma.quiz.update({
+        where: {
+          id: quizId,
+        },
+        data: {
+          title,
+          questions: {
+            update: questions.map((question, questionIdx) => {
+              const { description, correctAnswer, id: questionId } = question;
+
+              const res = {
+                description,
+                correctAnswer,
+                order: questionIdx,
+                answers: {
+                  update: question.answers.map((answer, idx) => {
+                    const { text, id: answerId } = answer;
+
+                    const res = {
+                      text,
+                      order: idx,
+                    };
+                    return {
+                      data: res,
+                      where: { id: answerId },
+                    };
+                  }),
+                },
+              };
+
+              return {
+                data: res,
+                where: {
+                  id: questionId,
+                },
+              };
+            }),
+          },
+        },
+      });
+    }),
   addNew: publicProcedure.input(quizInput).mutation(async ({ ctx, input }) => {
-    console.log(
-      "🚀 ~ file: quiz.ts:31 ~ addNew:publicProcedure.input ~ input:",
-      input
-    );
     const { title, questions } = input;
 
-    const newQuiz = await ctx.prisma.quiz.create({ data: { title } });
-    const newQuestions = await ctx.prisma.question.createMany({
-      data: questions.map((el) => {
-        const { order, description, correctAnswer } = el;
-        return {
-          quizId: newQuiz.id,
-          order,
-          description,
-          correctAnswer,
-        };
-      }),
+    return ctx.prisma.quiz.create({
+      data: {
+        title,
+        questions: {
+          create: questions.map((question, questionIdx) => {
+            const { description, correctAnswer } = question;
+            return {
+              description,
+              correctAnswer,
+              order: questionIdx,
+              answers: {
+                create: question.answers.map((answer, idx) => {
+                  const { text } = answer;
+                  return {
+                    text,
+                    order: idx,
+                  };
+                }),
+              },
+            };
+          }),
+        },
+      },
     });
-    console.log(
-      "🚀 ~ file: quiz.ts:49 ~ addNew:publicProcedure.input ~ newQuestions:",
-      newQuestions
-    );
-    return newQuestions;
-
-    const answersData = [];
-    // questions.forEach((question, idx)=> {
-    //   question.answers.forEach(answer=> {
-    //     answersData.push(
-    //       {
-    //         questionId: newQuestions[idx]
-    //       }
-    //     )
-    //   })
-    // })
-    // const newAnswers = await ctx.prisma.answer.createMany({
-    // });
-    // ctx.prisma
-    // return ctx.prisma.quiz.createMany({
-    //   data: input,
-    // });
   }),
 });

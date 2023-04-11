@@ -47,10 +47,8 @@ const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
             />
             <textarea
               className="textarea-bordered textarea textarea-xs w-full grow rounded-lg"
-              value={answer}
-              onChange={(e) =>
-                changeAnswer({ idx, description: e.target.value })
-              }
+              value={answer.text}
+              onChange={(e) => changeAnswer({ idx, text: e.target.value })}
             ></textarea>
             <button className="btn-error btn" onClick={() => deleteAnswer(idx)}>
               X
