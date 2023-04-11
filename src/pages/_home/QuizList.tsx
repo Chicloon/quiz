@@ -12,7 +12,7 @@ export const QuizList = () => {
   return (
     <div>
       <ol>
-        {data?.map((el) => (
+        {data?.map((el: any) => (
           <Link key={el.id} href={`/quiz/${el.id}`}>
             <li>{el.title}</li>
           </Link>

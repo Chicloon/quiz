@@ -11,7 +11,7 @@ export const QuizList = () => {
   return (
     <div>
       <ol>
-        {data?.map((el) => (
+        {data?.map((el: any) => (
           <li key={el.id}>{el.title}</li>
         ))}
       </ol>
