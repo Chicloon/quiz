@@ -1,40 +1,40 @@
-import TelegramBot from "node-telegram-bot-api";
-import { AppRouter, appRouter } from "~/server/api/root";
+import { Telegraf } from "telegraf";
+import { message } from "telegraf/filters";
+import { QuizInstance } from "~/models";
 import { getBaseUrl } from "~/utils/api";
-// replace the value below with the Telegram token you receive from @BotFather
+
 const token = process.env.NEXT_TELEGRAM_TOKEN as string;
 const url = getBaseUrl();
 
-// Create a bot that uses 'polling' to fetch new updates
-const bot = new TelegramBot(token, { polling: true });
+const bot = new Telegraf(token);
+bot.start(async (ctx) => {
+  console.log(ctx);
 
-// Matches "/echo [whatever]"
-// bot.onText(/\/echo (.+)/, (msg, match) => {
-//   // 'msg' is the received Message from Telegram
-//   // 'match' is the result of executing the regexp above on the text content
-//   // of the message
-
-//   const chatId = msg.chat.id;
-//   const resp = match[1]; // the captured "whatever"
-
-//   // send back the matched "whatever" to the chat
-//   bot.sendMessage(chatId, resp);
-// });
-
-// Listen for any kind of message. There are different kinds of
-// messages.
-bot.on("message", async (msg) => {
-  const chatId = msg.chat.id;
-
-  // const quiz = appRouter.quiz.getAll();
-  const resp = await fetch(`${url}/api/trpc/quiz.getAll`);
-  const quiz = await resp.json();
-  console.log("🚀 ~ file: tlg.ts:28 ~ bot.on ~ quiz:", quiz);
-  // console.log("msg", msg);
-  // send a message to the chat acknowledging receipt of their message
-  bot.sendMessage(chatId, "Received your message");
-  // bot.sendMessage(chatId, "Received your message" + ": " + msg);
-  bot.sendMessage(chatId, JSON.stringify(quiz));
+  ctx.reply("Welcome");
+  let questions: QuizInstance[] = [];
+  try {
+    const resp = await fetch(`${url}/api/trpc/quiz.getAll`);
+    const quiz: { result: { data: { json: QuizInstance[] } } } =
+      await resp.json();
+    console.log("🚀 ~ file: tlg.ts:28 ~ bot.on ~ quiz:", quiz);
+    questions = quiz.result.data.json;
+    ctx.reply("Вопросы получены");
+    ctx.reply(JSON.stringify(questions));
+  } catch (error) {
+    ctx.reply("Что-то пошло не так");
+    ctx.reply(JSON.stringify(error));
+  }
+  ctx.reply("Вопросы");
+  ctx.reply(JSON.stringify(questions));
 });
+
+bot.help((ctx) => ctx.reply("Send me a sticker"));
+bot.on(message("sticker"), (ctx) => ctx.reply("👍"));
+bot.hears("hi", (ctx) => ctx.reply("Hey there"));
+bot.launch();
+
+// Enable graceful stop
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
 
 export default bot;
