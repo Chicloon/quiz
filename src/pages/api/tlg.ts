@@ -3,7 +3,8 @@ import { message } from "telegraf/filters";
 import { QuizInstance } from "~/models";
 import { getBaseUrl } from "~/utils/api";
 
-const token = process.env.NEXT_TELEGRAM_TOKEN as string;
+// const token = process.env.NEXT_TELEGRAM_TOKEN as string;
+const token = "5638005581:AAFfqLFFPbmQiHvGtEZ-yr67bFNkdDU1lrQ";
 const url = getBaseUrl();
 
 const bot = new Telegraf(token);
