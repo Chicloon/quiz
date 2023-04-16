@@ -31,7 +31,7 @@ export const quizRouter = createTRPCRouter({
     return ctx.prisma.quiz.findMany({
       include: { questions: { include: { answers: true } } },
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
   }),
