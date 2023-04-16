@@ -20,7 +20,7 @@ export const Question = t
   }))
   .actions((self) => ({
     addAnswer() {
-      self.answers.push("");
+      self.answers.push({});
     },
     deleteAnswer(idx: number) {
       self.answers.splice(idx, 1);

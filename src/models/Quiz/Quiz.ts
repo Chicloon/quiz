@@ -37,6 +37,10 @@ export const Quiz = t
       const lastQuestion = self.questions[self.questions.length - 1];
       const lastQuestionAnswers = lastQuestion?.answers;
 
+      if (self.questions.length === 0) {
+        return true;
+      }
+
       if (
         lastQuestionAnswers &&
         lastQuestionAnswers.length > 0 &&
@@ -62,15 +66,14 @@ export const Quiz = t
     clearErrors() {
       destroy(self.errors);
     },
+    deleteQuestion(idx: number) {
+      destroy(self.questions[idx]);
+    },
   }))
 
   .actions((self) => ({
-    // init(data: QuizInstance) {
-    //   applySnapshot(self, data);
-    // },
     afterCreate() {
-      self.questions.push({ description: "Question titile" });
-      // self.errors.set("title", "asdfasdfa");
+      // self.questions.push({ description: "Question titile" });
     },
   }));
 

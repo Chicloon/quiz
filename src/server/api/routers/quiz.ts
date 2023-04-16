@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sortBy } from "lodash";
 
 import {
   createTRPCRouter,
@@ -29,6 +30,9 @@ export const quizRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.quiz.findMany({
       include: { questions: { include: { answers: true } } },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
   }),
   getById: publicProcedure
@@ -56,6 +60,12 @@ export const quizRouter = createTRPCRouter({
         quizId,
       } = input;
 
+      await ctx.prisma.question.deleteMany({
+        where: {
+          quizId,
+        },
+      });
+
       return ctx.prisma.quiz.update({
         where: {
           id: quizId,
@@ -63,33 +73,20 @@ export const quizRouter = createTRPCRouter({
         data: {
           title,
           questions: {
-            update: questions.map((question, questionIdx) => {
-              const { description, correctAnswer, id: questionId } = question;
-
-              const res = {
+            create: questions.map((question, questionIdx) => {
+              const { description, correctAnswer } = question;
+              return {
                 description,
                 correctAnswer,
                 order: questionIdx,
                 answers: {
-                  update: question.answers.map((answer, idx) => {
-                    const { text, id: answerId } = answer;
-
-                    const res = {
+                  create: question.answers.map((answer, idx) => {
+                    const { text } = answer;
+                    return {
                       text,
                       order: idx,
                     };
-                    return {
-                      data: res,
-                      where: { id: answerId },
-                    };
                   }),
-                },
-              };
-
-              return {
-                data: res,
-                where: {
-                  id: questionId,
                 },
               };
             }),
@@ -97,6 +94,7 @@ export const quizRouter = createTRPCRouter({
         },
       });
     }),
+
   addNew: publicProcedure.input(quizInput).mutation(async ({ ctx, input }) => {
     const { title, questions } = input;
 
@@ -125,4 +123,47 @@ export const quizRouter = createTRPCRouter({
       },
     });
   }),
+  getAnswersByQuizId: publicProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const quiz = await ctx.prisma.quiz.findFirst({ where: { id: input } });
+      const applicants = await ctx.prisma.applicant.findMany({
+        include: {
+          replies: true,
+          quiz: {
+            include: {
+              questions: true,
+            },
+          },
+        },
+        where: {
+          quizId: input,
+        },
+      });
+
+      console.log("🚀 ~ .query ~ quiz:", quiz);
+      console.log("🚀 ~ .query ~ applicants:", applicants);
+      console.log("questions", applicants[0]?.quiz?.questions);
+      const applicantsAnswers = applicants.map((applicant) => {
+        let correctAnswers = 0;
+        const questions = applicant.quiz.questions;
+        questions.forEach((question, idx) => {
+          if (applicant.replies[idx]?.answerNumber === question.correctAnswer) {
+            correctAnswers += 1;
+          }
+        });
+
+        console.log("question lengt", questions.length);
+        console.log("🚀 ~ applicantsAnswers ~ correctAnswers:", correctAnswers);
+        return {
+          ...applicant,
+          correctPercent: Math.floor((correctAnswers / questions.length) * 100),
+        };
+      });
+      console.log(
+        "🚀 ~ applicantsAnswers ~ applicantsAnswers:",
+        applicantsAnswers
+      );
+      return sortBy(applicantsAnswers, ["correctPercent"]);
+    }),
 });

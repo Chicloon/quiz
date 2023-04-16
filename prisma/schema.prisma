@@ -74,6 +74,7 @@ model Quiz {
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
     questions Question[]
+    applicants Applicant[]
 }
 
 model Question {
@@ -90,9 +91,29 @@ model Question {
 
 model Answer {
     id         String   @id @default(cuid())
-    questionId String
+    questionId String?
     order      Int
     text       String
-    question   Question @relation(fields: [questionId], references: [id])
-    quizId     String?
+    question   Question? @relation(fields: [questionId], references: [id])
+    replies Reply[] 
+}
+
+model Reply {
+    id String @id @default(cuid())
+    createdAt     DateTime @default(now())
+    applicantId String
+    applicant Applicant @relation(fields: [applicantId], references: [id])
+    answerId String
+    answer Answer @relation(fields: [answerId], references: [id])
+    answerNumber Int
+}
+
+model Applicant {
+    id String @id @default(cuid())
+    createdAt     DateTime @default(now())
+    name String
+    replies Reply[]
+    quizId String
+    quiz Quiz @relation(fields: [quizId], references: [id])
+
 }

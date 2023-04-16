@@ -17,6 +17,7 @@ const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
     setCorrectAnswer,
   } = model;
   console.log("save");
+  console.log("id", id);
 
   return (
     <div className="py-2">
@@ -24,7 +25,7 @@ const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        className="textarea-bordered textarea textarea-sm w-full rounded-lg"
+        className="grow-1 textarea-bordered textarea textarea-sm w-full rounded-lg"
       ></textarea>
 
       <div className="py-1 pl-8">

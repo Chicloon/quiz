@@ -9,6 +9,14 @@ const SideId = () => {
   const router = useRouter();
   const { id } = router.query;
 
+  const res = fetch(
+    "http://localhost:3000/api/trpc/bot.getById?" +
+      new URLSearchParams({
+        batch: "1",
+        input: JSON.stringify({ 0: { json: "clgcdidyz001svqe2u78c3k8z" } }),
+      })
+  );
+
   const { data, isLoading } = api.quiz.getById.useQuery(
     { id },
     {
@@ -22,6 +30,7 @@ const SideId = () => {
   );
 
   return <EditQuiz model={Quiz.create(data || undefined)} />;
+  // return <div></div>;
 };
 
 export default SideId;
