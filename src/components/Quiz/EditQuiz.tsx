@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { QuizInstance, useMst } from "~/models";
 import { api } from "~/utils/api";
 import Question from "./Question";
+import Link from "next/link";
 
 const EditQuiz: React.FC<{ model: QuizInstance }> = ({ model }) => {
   const {
@@ -85,18 +86,20 @@ const EditQuiz: React.FC<{ model: QuizInstance }> = ({ model }) => {
         </button>
       </div>
       <div>
-        {id ? (
-          <button
-            className="btn"
-            onClick={() => update({ quiz: quizBody(), quizId: id })}
-          >
-            Сохранить изменения
-          </button>
-        ) : (
-          <button className="btn" onClick={() => createNew(quizBody())}>
-            Создать опросник
-          </button>
-        )}
+        <Link href="/">
+          {id ? (
+            <button
+              className="btn"
+              onClick={() => update({ quiz: quizBody(), quizId: id })}
+            >
+              Сохранить изменения
+            </button>
+          ) : (
+            <button className="btn" onClick={() => createNew(quizBody())}>
+              Создать опросник
+            </button>
+          )}
+        </Link>
       </div>
     </div>
   );
