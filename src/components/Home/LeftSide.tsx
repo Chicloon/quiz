@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useMst } from "../../models/Root";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
@@ -7,10 +7,8 @@ import { api } from "~/utils/api";
 import QuizList from "./QuizList";
 
 const LeftSide = () => {
-  const root = useMst();
-  const router = useRouter();
-  console.log("root", root);
   const ctx = api.useContext();
+
   const { data: allQuizzes, isLoading: loadingQuizzes } =
     api.quiz.getAll.useQuery();
 

@@ -14,12 +14,13 @@ export const quizInput = z.object({
       id: z.string(),
       order: z.number(),
       description: z.string(),
-      correctAnswer: z.number(),
+      score: z.number(),
       answers: z.array(
         z.object({
           id: z.string(),
           text: z.string(),
           order: z.number(),
+          isCorrect: z.boolean(),
         })
       ),
     })
@@ -35,6 +36,7 @@ export const quizRouter = createTRPCRouter({
       },
     });
   }),
+
   getById: publicProcedure
     .input(
       z.object({
@@ -51,10 +53,41 @@ export const quizRouter = createTRPCRouter({
         where: { id: id },
       });
     }),
+
+  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
+    return ctx.prisma.quiz.delete({ where: { id: input } });
+  }),
+
+  addNew: publicProcedure.input(quizInput).mutation(async ({ ctx, input }) => {
+    const { title, questions } = input;
+    return ctx.prisma.quiz.create({
+      data: {
+        title,
+        questions: {
+          create: questions.map((question, questionIdx) => {
+            return {
+              ...question,
+              order: questionIdx,
+              answers: {
+                create: question.answers.map((answer, idx) => {
+                  const { text, isCorrect } = answer;
+                  return {
+                    isCorrect,
+                    text,
+                    order: idx,
+                  };
+                }),
+              },
+            };
+          }),
+        },
+      },
+    });
+  }),
+
   update: publicProcedure
     .input(z.object({ quiz: quizInput, quizId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // const { title, questions } = input.quiz
       const {
         quiz: { questions, title },
         quizId,
@@ -74,15 +107,14 @@ export const quizRouter = createTRPCRouter({
           title,
           questions: {
             create: questions.map((question, questionIdx) => {
-              const { description, correctAnswer } = question;
               return {
-                description,
-                correctAnswer,
+                ...question,
                 order: questionIdx,
                 answers: {
                   create: question.answers.map((answer, idx) => {
-                    const { text } = answer;
+                    const { text, isCorrect } = answer;
                     return {
+                      isCorrect,
                       text,
                       order: idx,
                     };
@@ -95,41 +127,15 @@ export const quizRouter = createTRPCRouter({
       });
     }),
 
-  addNew: publicProcedure.input(quizInput).mutation(async ({ ctx, input }) => {
-    const { title, questions } = input;
-
-    return ctx.prisma.quiz.create({
-      data: {
-        title,
-        questions: {
-          create: questions.map((question, questionIdx) => {
-            const { description, correctAnswer } = question;
-            return {
-              description,
-              correctAnswer,
-              order: questionIdx,
-              answers: {
-                create: question.answers.map((answer, idx) => {
-                  const { text } = answer;
-                  return {
-                    text,
-                    order: idx,
-                  };
-                }),
-              },
-            };
-          }),
-        },
-      },
-    });
-  }),
   getAnswersByQuizId: publicProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
       const quiz = await ctx.prisma.quiz.findFirst({ where: { id: input } });
       const applicants = await ctx.prisma.applicant.findMany({
         include: {
-          replies: true,
+          replies: {
+            include: { answer: true },
+          },
           quiz: {
             include: {
               questions: true,
@@ -141,29 +147,22 @@ export const quizRouter = createTRPCRouter({
         },
       });
 
-      console.log("🚀 ~ .query ~ quiz:", quiz);
-      console.log("🚀 ~ .query ~ applicants:", applicants);
-      console.log("questions", applicants[0]?.quiz?.questions);
       const applicantsAnswers = applicants.map((applicant) => {
-        let correctAnswers = 0;
+        let correctAnswers = applicant.replies.filter(
+          (el) => el.answer.isCorrect
+        ).length;
         const questions = applicant.quiz.questions;
-        questions.forEach((question, idx) => {
-          if (applicant.replies[idx]?.answerNumber === question.correctAnswer) {
-            correctAnswers += 1;
-          }
-        });
 
-        console.log("question lengt", questions.length);
-        console.log("🚀 ~ applicantsAnswers ~ correctAnswers:", correctAnswers);
         return {
           ...applicant,
           correctPercent: Math.floor((correctAnswers / questions.length) * 100),
         };
       });
+
       console.log(
         "🚀 ~ applicantsAnswers ~ applicantsAnswers:",
         applicantsAnswers
       );
-      return sortBy(applicantsAnswers, ["correctPercent"]);
+      return sortBy(applicantsAnswers, ["correctPercent"]).reverse();
     }),
 });

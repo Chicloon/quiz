@@ -15,19 +15,37 @@ const Question: React.FC<{ model: QuestionInstance; id: number }> = ({
     deleteAnswer,
     correctAnswer,
     setCorrectAnswer,
+    score,
+    setScore,
   } = model;
-  console.log("save");
-  console.log("id", id);
 
   return (
     <div className="py-2">
       <h1 className="font-semibold italic">Вопрос №{id + 1}</h1>
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="grow-1 textarea-bordered textarea textarea-sm w-full rounded-lg"
-      ></textarea>
+      <div className="flex gap-2">
+        <div className="grow">
+          <label className="label">
+            <span className="label-text">Текс вопроса</span>
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="grow-1 textarea-bordered textarea textarea-sm w-full rounded-lg"
+          ></textarea>
+        </div>
 
+        <div>
+          <label className="label">
+            <span className="label-text">Вес ответа</span>
+          </label>
+          <input
+            className="input-bordered input"
+            type="number"
+            value={score}
+            onChange={(e) => setScore(e.target.value)}
+          />
+        </div>
+      </div>
       <div className="py-1 pl-8">
         <h1 className="italic">Ответы</h1>
         {answers.map((answer, idx) => (

@@ -19,6 +19,7 @@ const EditQuiz: React.FC<{ model: QuizInstance }> = ({ model }) => {
     allowAddNextQuestion,
     quizBody,
     deleteQuestion,
+    allowSave,
   } = model;
 
   const ctx = api.useContext();
@@ -64,7 +65,7 @@ const EditQuiz: React.FC<{ model: QuizInstance }> = ({ model }) => {
         </span>
       </label>
       {questions.map((question, idx) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2" key={`question-${idx}`}>
           <button
             className="btn-error btn mt-4"
             onClick={() => deleteQuestion(idx)}
@@ -91,11 +92,16 @@ const EditQuiz: React.FC<{ model: QuizInstance }> = ({ model }) => {
             <button
               className="btn"
               onClick={() => update({ quiz: quizBody(), quizId: id })}
+              disabled={!allowSave}
             >
               Сохранить изменения
             </button>
           ) : (
-            <button className="btn" onClick={() => createNew(quizBody())}>
+            <button
+              disabled={!allowSave}
+              className="btn"
+              onClick={() => createNew(quizBody())}
+            >
               Создать опросник
             </button>
           )}

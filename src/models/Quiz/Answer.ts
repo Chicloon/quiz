@@ -5,11 +5,15 @@ export const Answer = t
   .model("Question", {
     id: "",
     text: "",
+    isCorrect: false,
     order: 0,
   })
   .actions((self) => ({
     setText(text: string) {
       self.text = text;
+    },
+    setCorrect(isCorrect: boolean) {
+      self.isCorrect = isCorrect;
     },
   }));
 

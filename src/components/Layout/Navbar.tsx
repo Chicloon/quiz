@@ -1,16 +1,36 @@
 import React from "react";
 import Profile from "./Profile";
 import { useRouter } from "next/router";
+import { router } from "@trpc/server";
+
+// const paths = [
+//   {
+//     name: "home",
+//     link: "/",
+//   },
+//   { link: "/groups", name: "groups" },
+// ];
+
+const paths = ["/", "/groups"];
 
 export const Navbar = () => {
   const router = useRouter();
+  console.log("🚀 ~ Navbar ~ router:", router);
+
+  console.log("path", router.pathname === paths[0]);
+  const checkSelected = (path: (typeof paths)[number]) => {
+    if (path === router.pathname) {
+      return "outline";
+    }
+    return "";
+  };
 
   return (
     <div className="navbar bg-neutral">
-      <div className="flex-1">
+      <div className="flex-1 gap-2">
         <button
-          className="btn text-xl normal-case"
-          onClick={() => router.push("/")}
+          className={`btn text-xl normal-case ${checkSelected(paths[0]!)}`}
+          onClick={() => router.push(paths[0]!)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -27,6 +47,14 @@ export const Navbar = () => {
             />
           </svg>
         </button>
+        <div
+          className={`hover: btn text-xl normal-case ${checkSelected(
+            paths[1]!
+          )}`}
+          onClick={() => router.push(paths[1]!)}
+        >
+          Группы
+        </div>
       </div>
       <div className="flex-none">
         <Profile />

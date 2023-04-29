@@ -1,15 +1,20 @@
 import React, { useState } from "react";
 import { api } from "~/utils/api";
 import { Loader } from "~/components";
-import Link from "next/link";
+import { useRouter } from "next/router";
 
 import { answersStore } from "~/models";
 import { observer } from "mobx-react-lite";
 
 const QuizList = () => {
-  // const [id, setId] = useState<null | string>(null);
+  const router = useRouter();
   const [id, setId] = useState("");
-  const { data, isLoading } = api.quiz.getAll.useQuery();
+  const { data, isLoading, refetch } = api.quiz.getAll.useQuery();
+  const { mutate } = api.quiz.delete.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+  });
   // console.log("🚀 ~ QuizList ~ answers:", answers);
 
   if (isLoading) {
@@ -22,23 +27,26 @@ const QuizList = () => {
     <div>
       <ol>
         {data?.map((el: any) => (
-          <li key={el.id}>
+          <li key={el.id} className="mb-1 ">
             <div
-              className={`bg flex ${
-                answersStore.id === el.id ? "bg-lime-100" : ""
+              className={`bg flex cursor-pointer gap-2 rounded p-2 ${
+                answersStore.id === el.id ? "bg-slate-300" : ""
               }  `}
+              onClick={() => answersStore.setId(el.id)}
             >
               <span className="grow">{el.title}</span>
 
-              <Link href={`/quiz/${el.id}`}>
-                <button className="btn-xs btn">Edit</button>
-              </Link>
-              {/* <button className="btn-xs btn" onClick={() => setId(el.id)}> */}
               <button
                 className="btn-xs btn"
-                onClick={() => answersStore.setId(el.id)}
+                onClick={() => router.push(`/quiz/${el.id}`)}
               >
-                Результаты
+                Edit
+              </button>
+              <button
+                className="btn-error btn-xs btn"
+                onClick={() => mutate(el.id)}
+              >
+                X
               </button>
             </div>
           </li>

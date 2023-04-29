@@ -17,21 +17,30 @@ export const Quiz = t
       const body: z.infer<typeof quizInput> = {
         title: self.title,
         questions: self.questions.map((question, idx) => {
-          const { id, description, correctAnswer, answers } = question;
+          const { answers } = question;
           return {
-            id,
+            ...question,
             order: idx,
-            description,
-            correctAnswer,
             answers: answers.map((el, answerIdx) => ({
               id: el.id,
               text: el.text,
               order: answerIdx,
+              isCorrect: el.isCorrect,
             })),
           };
         }),
       };
       return body;
+    },
+    get allowSave() {
+      const lastQuestion = self.questions[self.questions.length - 1];
+      const allow =
+        lastQuestion?.description.trim() !== "" &&
+        lastQuestion?.answers?.length &&
+        lastQuestion.answers.length > 1 &&
+        lastQuestion.answers.every((el) => el.text.trim() !== "");
+
+      return !!allow;
     },
     get allowAddNextQuestion() {
       const lastQuestion = self.questions[self.questions.length - 1];
